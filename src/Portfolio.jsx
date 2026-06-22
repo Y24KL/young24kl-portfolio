@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Camera, Film, MonitorPlay, ChevronDown, X, ChevronLeft, ChevronRight, Send } from 'lucide-react';
+import { Camera, Film, MonitorPlay, ChevronDown, X, ChevronLeft, ChevronRight, Send, Instagram } from 'lucide-react';
 
 import hero1 from './assets/IMG_9204.JPG'; 
 import hero2 from './assets/IMG_3599.JPG';
@@ -17,8 +17,8 @@ import p2_f from './assets/IMG_8526.JPG';
 import p2_g from './assets/IMG_8577.JPG';
 import p2_h from './assets/IMG_8648.JPG';
 import p2_i from './assets/IMG_8654.JPG';
-import btsImage from './assets/IMG_9252.JPG'; // Replace with your actual filename
-import ceoImage from './assets/ceo-pic.jpg';     // Replace with your actual filename
+import btsImage from './assets/IMG_9252.JPG'; 
+import ceoImage from './assets/ceo-pic.jpg';     
 
 const heroImages = [hero1, hero2, hero3];
 
@@ -29,6 +29,10 @@ const Portfolio = () => {
   const [activeProject, setActiveProject] = useState(null);
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
+  // Form Submission States
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { scrollYProgress } = useScroll();
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
 
@@ -37,7 +41,6 @@ const Portfolio = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Added a third project to balance the 3-column grid
   const projects = [
     { id: 1, title: "CSC HOD GAMES", images: [p1_a, p1_b, p1_c] },
     { id: 2, title: "SHODEINDE HALL WEEK", images: [p2_a, p2_b, p2_c] },
@@ -55,6 +58,36 @@ const Portfolio = () => {
     setCurrentImgIndex((prev) => (prev - 1 + activeProject.images.length) % activeProject.images.length);
   };
 
+  // Background Form Submission Handler
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    const form = e.target;
+    const data = new FormData(form);
+
+    try {
+      const response = await fetch("https://formspree.io/f/xykaaqnn", {
+        method: "POST",
+        body: data,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        setIsSubmitted(true);
+        form.reset();
+      } else {
+        alert("Oops! There was a problem submitting your form. Please try again.");
+      }
+    } catch (error) {
+      alert("Oops! There was a problem connecting to the server.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Animation variants for staggered reveals
   const fadeUp = {
     hidden: { opacity: 0, y: 40 },
@@ -69,13 +102,69 @@ const Portfolio = () => {
     }
   };
 
+  // --- INTERACTIVE THANK YOU SCREEN VIEW ---
+  if (isSubmitted) {
+    return (
+      <div className="bg-[#0a0a0a] min-h-screen text-gray-200 font-sans flex flex-col items-center justify-center relative overflow-hidden px-4 selection:bg-[#cfab52] selection:text-black">
+        
+        {/* Ambient Cinematic Background Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none" />
+        
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="max-w-xl text-center backdrop-blur-xl bg-white/[0.02] border border-white/10 p-8 md:p-14 rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.8)] z-10"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+            className="w-20 h-20 bg-gradient-to-r from-[#E5C06B] to-[#B48C36] rounded-full flex items-center justify-center text-black mx-auto mb-8"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-10 h-10">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+          </motion.div>
+
+          <h2 className="text-3xl font-extrabold text-white mb-6 tracking-tight">
+            Booking Confirmed!
+          </h2>
+          
+          <p className="text-gray-400 text-lg leading-relaxed mb-8">
+            Thank you for booking us our HR will get back to you in the next 24hours
+          </p>
+
+          <button 
+            onClick={() => setIsSubmitted(false)}
+            className="border border-[#cfab52] text-[#cfab52] hover:bg-[#cfab52] hover:text-black font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-lg"
+          >
+            Back to Portfolio
+          </button>
+        </motion.div>
+
+        {/* Custom Instagram Redirection Footer */}
+        <footer className="absolute bottom-8 text-center z-10 text-sm">
+          <a 
+            href="https://instagram.com/24klvisuals" // <-- Swap with your actual Instagram handle
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="inline-flex items-center gap-2 text-gray-500 hover:text-[#D4AF37] transition-colors group"
+          >
+            <Instagram size={18} className="group-hover:scale-110 transition-transform text-gray-400 group-hover:text-[#D4AF37]" />
+            <span className="font-light tracking-wide">Connect with us on Instagram</span>
+          </a>
+        </footer>
+      </div>
+    );
+  }
+
+  // --- MAIN PORTFOLIO INTERFACE VIEW ---
   return (
     <div className="bg-[#0a0a0a] min-h-screen text-gray-200 font-sans overflow-x-hidden selection:bg-[#cfab52] selection:text-black">
       
       {/* HERO SECTION */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        
-        {/* Animated Hero Image Loop */}
         <AnimatePresence mode="wait">
           <motion.img
             key={index}
@@ -88,10 +177,8 @@ const Portfolio = () => {
           />
         </AnimatePresence>
 
-        {/* Gradient Overlay to ensure text readability over images */}
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/80 via-black/40 to-[#0a0a0a]" />
 
-        {/* Hero Content */}
         <div className="relative z-10 text-center px-4 flex flex-col items-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -100,7 +187,7 @@ const Portfolio = () => {
           >
             <h1 className="text-5xl md:text-8xl font-extrabold tracking-tighter mb-4">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] via-[#D4AF37] to-[#B48C36]">
-                Young24KL
+                YOUNG24KL
               </span>
               <br />
               <span className="text-white">Studios</span>
@@ -140,19 +227,15 @@ const Portfolio = () => {
             </p>
           </div>
           <div className="relative h-full min-h-[400px] rounded-2xl overflow-hidden group">
-  
-  {/* YOUR ACTUAL IMAGE */}
-  <img 
-    src={btsImage} 
-    alt="Behind the Scenes" 
-    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 z-0" 
-  />
-
-  {/* Text Overlay */}
-  <div className="absolute inset-0 bg-gradient-to-tr from-black/80 to-transparent flex items-end p-8 z-10">
-    <span className="text-[#D4AF37] tracking-widest uppercase text-sm font-semibold">Behind the Scenes</span>
-  </div>
-</div>
+            <img 
+              src={btsImage} 
+              alt="Behind the Scenes" 
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 z-0" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-tr from-black/80 to-transparent flex items-end p-8 z-10">
+              <span className="text-[#D4AF37] tracking-widest uppercase text-sm font-semibold">Behind the Scenes</span>
+            </div>
+          </div>
         </motion.div>
       </section>
 
@@ -249,22 +332,17 @@ const Portfolio = () => {
             viewport={{ once: true }}
             className="flex flex-col md:flex-row gap-12 items-center"
           >
-            {/* CEO Image Placeholder */}
             <div className="w-full md:w-1/3 aspect-[4/5] bg-zinc-800 rounded-3xl overflow-hidden relative border border-white/10 shadow-[0_0_40px_rgba(212,175,55,0.1)]">
-   
-   {/* YOUR ACTUAL IMAGE */}
-   <img 
-     src={ceoImage} 
-     alt="Gamaliel Godfrey Balanku" 
-     className="absolute inset-0 w-full h-full object-cover z-0" 
-   />
-
-   {/* Text Overlay */}
-   <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex flex-col justify-end p-8 z-10">
-     <h3 className="text-2xl font-bold text-white">GAMALIEL GODFREY BALANKU</h3>
-     <p className="text-[#D4AF37]">Founder & Creative Director</p>
-   </div>
-</div>
+               <img 
+                 src={ceoImage} 
+                 alt="Gamaliel Godfrey Balanku" 
+                 className="absolute inset-0 w-full h-full object-cover z-0" 
+               />
+               <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex flex-col justify-end p-8 z-10">
+                 <h3 className="text-2xl font-bold text-white">GAMALIEL GODFREY BALANKU</h3>
+                 <p className="text-[#D4AF37]">Founder & Creative Director</p>
+               </div>
+            </div>
             
             <div className="w-full md:w-2/3">
               <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white">The Mind Behind The Lens</h2>
@@ -286,14 +364,14 @@ const Portfolio = () => {
             <h2 className="text-4xl font-bold mb-4 text-white">Let's Create Together</h2>
             <p className="text-gray-400 mb-12 text-lg">Ready to start your next masterpiece? Reach out to us below.</p>
             
-            <form action="https://formspree.io/f/xykaaqnn" method="POST" className="space-y-6 text-left">
+            <form onSubmit={handleFormSubmit} className="space-y-6 text-left">
               <div className="grid md:grid-cols-2 gap-6">
                 <input type="text" name="name" placeholder="Your Name" required className="w-full bg-[#111] border border-white/10 p-4 rounded-xl focus:border-[#D4AF37] outline-none text-white transition-colors" />
                 <input type="email" name="email" placeholder="Your Email" required className="w-full bg-[#111] border border-white/10 p-4 rounded-xl focus:border-[#D4AF37] outline-none text-white transition-colors" />
               </div>
               <textarea name="message" rows="5" placeholder="Tell us about your project" required className="w-full bg-[#111] border border-white/10 p-4 rounded-xl focus:border-[#D4AF37] outline-none text-white transition-colors"></textarea>
-              <button type="submit" className="w-full bg-gradient-to-r from-[#E5C06B] to-[#B48C36] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
-                Send Message <Send size={20} />
+              <button type="submit" disabled={isSubmitting} className="w-full bg-gradient-to-r from-[#E5C06B] to-[#B48C36] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50">
+                {isSubmitting ? "Sending..." : "Send Message"} <Send size={20} />
               </button>
             </form>
           </motion.div>
