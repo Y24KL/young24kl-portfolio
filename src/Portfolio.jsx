@@ -176,7 +176,7 @@ const Portfolio = () => {
           >
             <h1 className="text-5xl md:text-8xl font-extrabold tracking-tighter mb-4">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] via-[#D4AF37] to-[#B48C36]">
-                Young24KL
+                YOUNG24KL
               </span>
               <br />
               <span className="text-white">Studios</span>
@@ -197,34 +197,38 @@ const Portfolio = () => {
         </div>
       </section>
 
-      {/* VISION & ABOUT SECTION */}
+     {/* VISION & ABOUT SECTION */}
       <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto relative z-10">
         <motion.div 
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid md:grid-cols-2 gap-12 items-center bg-gray-50 border border-gray-100 p-8 md:p-16 rounded-3xl shadow-sm"
+          className="grid md:grid-cols-2 gap-12 items-center backdrop-blur-xl bg-white/[0.02] border border-white/10 p-8 md:p-16 rounded-3xl"
         >
           <div>
             <h2 className="text-3xl md:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] to-[#B48C36]">
               The Vision
             </h2>
             <div className="w-20 h-1 bg-[#D4AF37] mb-8"></div>
-            <p className="text-gray-600 leading-relaxed text-lg mb-6">
+            <p className="text-gray-400 leading-relaxed text-lg mb-6">
               At Young24KL Studios, we don't just capture moments; we architect cinematic experiences. Born from a passion for visual storytelling, our studio merges high-end technology with raw creative intuition. 
             </p>
           </div>
-          <div className="relative h-full min-h-[400px] rounded-2xl overflow-hidden shadow-lg group">
-            <img 
-              src={btsImage} 
-              alt="Behind the Scenes" 
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 z-0" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-tr from-black/60 to-transparent flex items-end p-8 z-10">
-              <span className="text-white tracking-widest uppercase text-sm font-semibold">Behind the Scenes</span>
-            </div>
-          </div>
+          <div className="relative h-full min-h-[400px] rounded-2xl overflow-hidden group">
+  
+  {/* YOUR ACTUAL IMAGE */}
+  <img 
+    src={btsImage} 
+    alt="Behind the Scenes" 
+    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 z-0" 
+  />
+
+  {/* Text Overlay */}
+  <div className="absolute inset-0 bg-gradient-to-tr from-black/80 to-transparent flex items-end p-8 z-10">
+    <span className="text-[#D4AF37] tracking-widest uppercase text-sm font-semibold">Behind the Scenes</span>
+  </div>
+</div>
         </motion.div>
       </section>
 
