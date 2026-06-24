@@ -250,7 +250,7 @@ const Portfolio = () => {
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4 text-white">Our Expertise</h2>
-            <p className="text-[#cfab52]">Precision. Aesthetics. Motion.</p>
+            <p className="text-[#cfab52]">Precision. Aesthetics. Motion. Excellence.</p>
           </motion.div>
 
           <motion.div 
