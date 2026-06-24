@@ -146,7 +146,7 @@ const Portfolio = () => {
         {/* Custom Instagram Redirection Footer */}
         <footer className="absolute bottom-8 text-center z-10 text-sm">
           <a 
-            href="https://instagram.com/24kl visuals" // <-- Swap with your actual Instagram handle
+            href="https://instagram.com/24klvisuals" // <-- Swap with your actual Instagram handle
             target="_blank" 
             rel="noopener noreferrer" 
             className="inline-flex items-center gap-2 text-gray-500 hover:text-[#D4AF37] transition-colors group"
@@ -250,7 +250,7 @@ const Portfolio = () => {
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4 text-white">Our Expertise</h2>
-            <p className="text-[#cfab52]">Precision. Aesthetics. Motion. Excellence.</p>
+            <p className="text-[#cfab52]">Precision. Aesthetics. Motion.</p>
           </motion.div>
 
           <motion.div 
