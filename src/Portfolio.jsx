@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-// Removed the 'Instagram' import causing the build crash
 import { Camera, Film, MonitorPlay, ChevronDown, X, ChevronLeft, ChevronRight, Send } from 'lucide-react';
 
-// Ensure all these files exist in src/assets with exact case matching!
-import logo from './assets/logo.png'; 
+// Make absolutely sure these EXACT filenames exist in your src/assets folder on GitHub
 import hero1 from './assets/IMG_9204.JPG'; 
 import hero2 from './assets/IMG_3599.JPG';
 import hero3 from './assets/IMG_9217.JPG';
@@ -14,7 +12,7 @@ import p1_c from './assets/IMG_9185.JPG';
 import p2_a from './assets/IMG_3904.JPG';
 import p2_b from './assets/IMG_3903.JPG';
 import p2_c from './assets/IMG_4349.JPG';
-import p2_d from './assets/IMG_8716.JPG'; // Replaced IMG_3905.JPG with 8716 based on your provided file
+import p2_d from './assets/IMG_8716.JPG'; 
 import p2_e from './assets/IMG_8719.JPG';
 import p2_f from './assets/IMG_8526.JPG';
 import p2_g from './assets/IMG_8577.JPG';
@@ -22,9 +20,6 @@ import p2_h from './assets/IMG_8648.JPG';
 import p2_i from './assets/IMG_8654.JPG';
 import btsImage from './assets/IMG_9252.JPG'; 
 import ceoImage from './assets/ceo-pic.jpg';     
-
-// If you are using Firebase, ensure src/firebase.js exists. 
-// import { db } from './firebase'; 
 
 const heroImages = [hero1, hero2, hero3];
 
@@ -154,9 +149,11 @@ const Portfolio = () => {
   return (
     <div className="bg-white min-h-screen text-gray-800 font-sans overflow-x-hidden selection:bg-[#cfab52] selection:text-white">
       
-      {/* Navigation Bar */}
+      {/* REPLACED LOGO WITH TEXT TO BYPASS RENDER DEPLOYMENT CRASH */}
       <nav className="absolute top-0 w-full p-6 md:px-12 z-50 flex items-center justify-center md:justify-start bg-gradient-to-b from-white/60 to-transparent">
-        <img src={logo} alt="Young24KL Studios" className="h-12 w-auto object-contain" />
+        <h1 className="text-2xl font-black tracking-tighter text-gray-900 drop-shadow-md">
+          YOUNG24KL <span className="text-[#D4AF37]">Studios</span>
+        </h1>
       </nav>
 
       {/* HERO SECTION */}
