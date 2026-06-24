@@ -91,8 +91,7 @@ const Portfolio = () => {
 
   if (isSubmitted) {
     return (
-      <div className="bg-black min-h-screen text-white font-sans selection:bg-[#D4AF37] selection:text-black">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#D4AF37]/10 rounded-full blur-[120px] pointer-events-none" />
+<div className="bg-[#0a0a0a] min-h-screen text-gray-200 font-sans overflow-x-hidden selection:bg-[#cfab52] selection:text-black">
         
         <motion.div 
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -147,43 +146,44 @@ const Portfolio = () => {
   }
 
   return (
-    <div className="bg-white min-h-screen text-gray-800 font-sans overflow-x-hidden selection:bg-[#cfab52] selection:text-white">
+   <div className="bg-[#0a0a0a] min-h-screen text-gray-200 font-sans overflow-x-hidden selection:bg-[#cfab52] selection:text-black">
       
-      {/* REPLACED LOGO WITH TEXT TO BYPASS RENDER DEPLOYMENT CRASH */}
-      <nav className="absolute top-0 w-full p-6 md:px-12 z-50 flex items-center justify-center md:justify-start bg-gradient-to-b from-white/60 to-transparent">
-        <h1 className="text-2xl font-black tracking-tighter text-gray-900 drop-shadow-md">
-          YOUNG24KL <span className="text-[#D4AF37]">Studios</span>
-        </h1>
-      </nav>
-
-      {/* HERO SECTION */}
+     {/* HERO SECTION */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        
+        {/* Animated Hero Image Loop */}
         <AnimatePresence mode="wait">
           <motion.img
             key={index}
             src={heroImages[index]}
             initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 0.3, scale: 1 }}
+            animate={{ opacity: 0.5, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.5, ease: "easeInOut" }}
             className="absolute inset-0 w-full h-full object-cover z-0"
           />
         </AnimatePresence>
 
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-white/90 via-white/50 to-white" />
+        {/* Gradient Overlay to ensure text readability over images */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/80 via-black/40 to-[#0a0a0a]" />
 
-        <div className="relative z-10 text-center px-4 flex flex-col items-center mt-16">
+        {/* Hero Content */}
+        <div className="relative z-10 text-center px-4 flex flex-col items-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
           >
-            <h1 className="text-4xl md:text-7xl font-extrabold tracking-tighter mb-6 text-gray-900 leading-tight">
-              Creating a visual <br /> masterpiece
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] to-[#B48C36]">
-                one frame at a time.
+            <h1 className="text-5xl md:text-8xl font-extrabold tracking-tighter mb-4">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] via-[#D4AF37] to-[#B48C36]">
+                Young24KL
               </span>
+              <br />
+              <span className="text-white">Studios</span>
             </h1>
+            <p className="text-lg md:text-2xl font-light tracking-widest uppercase text-[#cfab52] mb-8">
+              Creating a visual masterpiece <br className="md:hidden" /> one frame at a time
+            </p>
           </motion.div>
 
           <motion.div
@@ -192,7 +192,7 @@ const Portfolio = () => {
             transition={{ delay: 1.5, duration: 1 }}
             className="absolute bottom-10 animate-bounce text-[#cfab52]"
           >
-            <ChevronDown size={32} strokeWidth={2} />
+            <ChevronDown size={32} strokeWidth={1.5} />
           </motion.div>
         </div>
       </section>
