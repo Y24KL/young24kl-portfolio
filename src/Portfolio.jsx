@@ -91,7 +91,7 @@ const Portfolio = () => {
 
   if (isSubmitted) {
     return (
-      <div className="bg-gray-50 min-h-screen text-gray-800 font-sans flex flex-col items-center justify-center relative overflow-hidden px-4 selection:bg-[#cfab52] selection:text-white">
+      <div className="bg-black min-h-screen text-white font-sans selection:bg-[#D4AF37] selection:text-black">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#D4AF37]/10 rounded-full blur-[120px] pointer-events-none" />
         
         <motion.div 
