@@ -297,46 +297,54 @@ const Portfolio = () => {
         </div>
       </section>
 
-      {/* PREVIOUS WORKS / PORTFOLIO SECTION */}
-      <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto relative z-10">
-        <motion.div
-           variants={fadeUp}
-           initial="hidden"
-           whileInView="visible"
-           viewport={{ once: true }}
-        >
-          <h2 className="text-4xl font-bold mb-12 text-white">The Masterpieces</h2>
-        </motion.div>
-        
-        <motion.div 
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {projects.map((project) => (
-            <motion.div 
-              key={project.id}
-              variants={fadeUp}
-              onClick={() => { setActiveProject(project); setCurrentImgIndex(0); }}
-              className="relative aspect-video bg-zinc-900 rounded-xl overflow-hidden group cursor-pointer border border-white/10 hover:border-[#D4AF37]/50 transition-colors"
+      {/* LIGHTBOX MODAL */}
+      <AnimatePresence>
+        {activeProject && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 backdrop-blur-sm"
+            onClick={() => setActiveProject(null)}
+          >
+            {/* Close Button - Responsive spacing & padding backstop for mobile */}
+            <button 
+              className="absolute top-4 right-4 md:top-8 md:right-8 text-white z-50 hover:text-[#D4AF37] transition-colors bg-black/40 p-2 rounded-full md:bg-transparent md:p-0" 
+              onClick={() => setActiveProject(null)}
             >
-              <img 
-                src={project.images[0]} 
-                alt={project.title} 
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-              />
-              <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col items-center justify-center">
-                <h3 className="text-white text-xl font-bold mb-4 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">{project.title}</h3>
-                <span className="text-[#cfab52] font-semibold tracking-wider uppercase border border-[#cfab52] px-6 py-2 rounded-full hover:bg-[#cfab52] hover:text-black transition-colors">
-                  View Gallery
-                </span>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </section>
+              <X className="w-8 h-8 md:w-10 md:h-10" />
+            </button>
+            
+            {/* Left Arrow - Explicitly centered vertically */}
+            <button 
+              className="absolute top-1/2 -translate-y-1/2 left-4 md:left-12 text-white p-3 md:p-4 bg-white/10 rounded-full hover:bg-white/20 transition z-50" 
+              onClick={prevImage}
+            >
+              <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+            </button>
+            
+            {/* Image Container - Constrained height to keep space for buttons */}
+            <img 
+              src={activeProject.images[currentImgIndex]} 
+              className="max-w-full max-h-[75vh] md:max-h-[85vh] object-contain rounded-lg shadow-2xl" 
+              onClick={(e) => e.stopPropagation()} 
+            />
+            
+            {/* Right Arrow - Explicitly centered vertically */}
+            <button 
+              className="absolute top-1/2 -translate-y-1/2 right-4 md:right-12 text-white p-3 md:p-4 bg-white/10 rounded-full hover:bg-white/20 transition z-50" 
+              onClick={nextImage}
+            >
+              <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+            </button>
+            
+            {/* Image Counter */}
+            <div className="absolute bottom-6 md:bottom-8 text-white font-bold tracking-widest bg-black/50 px-6 py-2 rounded-full text-sm md:text-base">
+              {currentImgIndex + 1} / {activeProject.images.length}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* CEO PROFILE SECTION */}
       <section className="py-24 bg-gradient-to-b from-[#0a0a0a] to-[#000000] relative z-10">
@@ -386,9 +394,13 @@ const Portfolio = () => {
                 <input type="email" name="email" placeholder="Your Email" required className="w-full bg-[#111] border border-white/10 p-4 rounded-xl focus:border-[#D4AF37] outline-none text-white transition-colors" />
               </div>
               <textarea name="message" rows="5" placeholder="Tell us about your project" required className="w-full bg-[#111] border border-white/10 p-4 rounded-xl focus:border-[#D4AF37] outline-none text-white transition-colors"></textarea>
-              <button type="submit" disabled={isSubmitting} className="w-full bg-gradient-to-r from-[#E5C06B] to-[#B48C36] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50">
-                {isSubmitting ? "Sending..." : "Send Message"} <Send size="{20}"/>
-              </button>
+              <button 
+  type="submit" 
+  className="w-full bg-gradient-to-r from-[#E5C06B] to-[#B48C36] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+>
+  <span className="whitespace-nowrap">Send Message</span> 
+  <Send className="w-5 h-5 shrink-0" />
+</button>
             </form>
           </motion.div>
         </div>
