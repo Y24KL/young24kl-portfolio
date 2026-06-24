@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Camera, Film, MonitorPlay, ChevronDown, X, ChevronLeft, ChevronRight, Send, Instagram } from 'lucide-react';
+import { Camera, Film, MonitorPlay, ChevronDown, X, ChevronLeft, ChevronRight, Send } from 'lucide-react';
 
 import hero1 from './assets/IMG_9204.JPG'; 
 import hero2 from './assets/IMG_3599.JPG';
@@ -151,7 +151,23 @@ const Portfolio = () => {
             rel="noopener noreferrer" 
             className="inline-flex items-center gap-2 text-gray-500 hover:text-[#D4AF37] transition-colors group"
           >
-            <Instagram size={18} className="group-hover:scale-110 transition-transform text-gray-400 group-hover:text-[#D4AF37]" />
+            {/* Inline SVG Replacement for the Lucide Instagram Icon */}
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="18" 
+              height="18" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              className="group-hover:scale-110 transition-transform text-gray-400 group-hover:text-[#D4AF37]"
+            >
+              <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+            </svg>
             <span className="font-light tracking-wide">Connect with us on Instagram</span>
           </a>
         </footer>
@@ -187,7 +203,7 @@ const Portfolio = () => {
           >
             <h1 className="text-5xl md:text-8xl font-extrabold tracking-tighter mb-4">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] via-[#D4AF37] to-[#B48C36]">
-                Young24KL
+                YOUNG24KL
               </span>
               <br />
               <span className="text-white">Studios</span>
@@ -250,7 +266,7 @@ const Portfolio = () => {
             className="text-center mb-16"
           >
             <h2 className="text-4xl font-bold mb-4 text-white">Our Expertise</h2>
-            <p className="text-[#cfab52]">Precision. Aesthetics. Motion.</p>
+            <p className="text-[#cfab52]">Precision. Aesthetics. Motion. Excellence.</p>
           </motion.div>
 
           <motion.div 
@@ -358,7 +374,7 @@ const Portfolio = () => {
       </section>
 
       {/* CONTACT US SECTION */}
-      <section className="py-24 bg-[#050505] relative z-10 border-t border-white/10">
+     <section className="py-24 bg-[#050505] relative z-10 border-t border-white/10">
         <div className="max-w-4xl mx-auto px-6 md:px-12 text-center">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
             <h2 className="text-4xl font-bold mb-4 text-white">Let's Create Together</h2>
@@ -371,20 +387,18 @@ const Portfolio = () => {
               </div>
               <textarea name="message" rows="5" placeholder="Tell us about your project" required className="w-full bg-[#111] border border-white/10 p-4 rounded-xl focus:border-[#D4AF37] outline-none text-white transition-colors"></textarea>
               <button type="submit" disabled={isSubmitting} className="w-full bg-gradient-to-r from-[#E5C06B] to-[#B48C36] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50">
-                {isSubmitting ? "Sending..." : "Send Message"} <Send size={20} />
+                {isSubmitting ? "Sending..." : "Send Message"} <Send size="{20}"/>
               </button>
             </form>
           </motion.div>
         </div>
       </section>
-
-      {/* FOOTER */}
-      <footer className="py-12 border-t border-white/10 text-center text-gray-500 bg-[#000000]">
+                <footer className="py-12 border-t border-white/10 text-center text-gray-500 bg-[#000000]">
         <p>© {new Date().getFullYear()} Young24KL Studios. All Rights Reserved.</p>
         <p className="text-sm mt-2">Creating a visual masterpiece one frame at a time.</p>
       </footer>
 
-      {/* LIGHTBOX MODAL */}
+      
       <AnimatePresence>
         {activeProject && (
           <motion.div 
@@ -395,11 +409,11 @@ const Portfolio = () => {
             onClick={() => setActiveProject(null)}
           >
             <button className="absolute top-8 right-8 text-white z-50 hover:text-[#D4AF37] transition-colors" onClick={() => setActiveProject(null)}>
-              <X size={40} />
+              <X size="{40}"/>
             </button>
             
             <button className="absolute left-4 md:left-12 text-white p-4 bg-white/10 rounded-full hover:bg-white/20 transition z-50" onClick={prevImage}>
-              <ChevronLeft size={30} />
+              <ChevronLeft size="{30}"/>
             </button>
             
             <img 
@@ -409,7 +423,7 @@ const Portfolio = () => {
             />
             
             <button className="absolute right-4 md:right-12 text-white p-4 bg-white/10 rounded-full hover:bg-white/20 transition z-50" onClick={nextImage}>
-              <ChevronRight size={30} />
+              <ChevronRight size="{30}"/>
             </button>
             
             <div className="absolute bottom-8 text-white font-bold tracking-widest bg-black/50 px-6 py-2 rounded-full">
