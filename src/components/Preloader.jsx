@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import logo from '../assets/logo.png';
 
 const Preloader = ({ visible }) => {
   return (
@@ -16,6 +17,7 @@ const Preloader = ({ visible }) => {
             transition={{ duration: 0.6, ease: 'easeOut' }}
             className="flex flex-col items-center gap-4"
           >
+            <img src={logo} alt="Young24KL Visuals" className="h-20 w-20 md:h-24 md:w-24 rounded-full" />
             <span className="font-display text-3xl md:text-4xl tracking-wide text-white font-bold">
               YOUNG<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] to-[#B48C36]">24KL</span>
             </span>

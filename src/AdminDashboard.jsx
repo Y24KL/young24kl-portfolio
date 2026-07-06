@@ -1,11 +1,12 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, ArrowLeft, ArrowRight, UploadCloud, Image as ImageIcon, Film, Layout, Grid, Loader2 } from 'lucide-react';
 
 // Firebase Imports
 import { collection, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, storage } from './firebase';
+import { db } from './firebase';
+import { storage } from './firebaseAdmin';
 
 const AdminDashboard = ({ projects, onExit }) => {
   const [activeProjectId, setActiveProjectId] = useState(projects[0]?.id || null);
@@ -55,7 +56,7 @@ const AdminDashboard = ({ projects, onExit }) => {
 
     for (let file of files) {
       const isVideo = file.type.startsWith('video/');
-      const fileId = `media-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const fileId = `media-${crypto.randomUUID()}`;
       const storageRefPath = `portfolio/${activeProjectId}/${fileId}-${file.name}`;
       const storageReference = ref(storage, storageRefPath);
 
