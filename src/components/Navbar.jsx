@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 const NAV_LINKS = [
   { label: 'Vision', href: '#vision' },
@@ -35,8 +36,11 @@ const Navbar = () => {
         }`}
       >
         <nav className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
-          <a href="#home" className="font-display text-2xl tracking-wide text-white font-bold">
-            YOUNG<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] to-[#B48C36]">24KL</span>
+          <a href="#home" className="flex items-center gap-3">
+            <img src={logo} alt="Young24KL Visuals" className="h-10 w-10 rounded-full" />
+            <span className="font-display text-2xl tracking-wide text-white font-bold">
+              YOUNG<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] to-[#B48C36]">24KL</span>
+            </span>
           </a>
 
           <div className="hidden md:flex items-center gap-10">
@@ -76,8 +80,11 @@ const Navbar = () => {
             className="fixed inset-0 z-[60] bg-[#0a0a0a]/98 backdrop-blur-xl flex flex-col"
           >
             <div className="flex items-center justify-between px-6 py-6">
-              <span className="font-display text-2xl text-white font-bold">
-                YOUNG<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] to-[#B48C36]">24KL</span>
+              <span className="flex items-center gap-3">
+                <img src={logo} alt="Young24KL Visuals" className="h-9 w-9 rounded-full" />
+                <span className="font-display text-2xl text-white font-bold">
+                  YOUNG<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] to-[#B48C36]">24KL</span>
+                </span>
               </span>
               <button
                 className="text-white p-1"

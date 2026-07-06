@@ -1,4 +1,5 @@
 import { ArrowUp } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 const InstagramIcon = (props) => (
   <svg
@@ -34,8 +35,11 @@ const Footer = () => {
     <footer className="relative z-10 bg-black border-t border-white/10">
       <div className="max-w-7xl mx-auto px-6 md:px-12 py-16 grid gap-12 md:grid-cols-4">
         <div className="md:col-span-2">
-          <a href="#home" className="font-display text-2xl font-bold text-white">
-            YOUNG<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] to-[#B48C36]">24KL</span>
+          <a href="#home" className="flex items-center gap-3">
+            <img src={logo} alt="Young24KL Visuals" className="h-10 w-10 rounded-full" />
+            <span className="font-display text-2xl font-bold text-white">
+              YOUNG<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] to-[#B48C36]">24KL</span>
+            </span>
           </a>
           <p className="text-gray-500 mt-4 max-w-sm leading-relaxed">
             Creating a visual masterpiece one frame at a time. Cinematic photography,

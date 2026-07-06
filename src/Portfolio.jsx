@@ -29,9 +29,8 @@ const heroImages = [hero1, hero2, hero3];
 
 const stats = [
   { value: 3, suffix: '+', label: 'Years Behind the Lens' },
-  { value: 50, suffix: '+', label: 'Events Covered' },
+  { value: 30, suffix: '+', label: 'Events Covered' },
   { value: 1000, suffix: '+', label: 'Photos Delivered' },
-  { value: 20, suffix: 'K+', label: 'Instagram Community' },
 ];
 
 const testimonials = [
@@ -64,10 +63,46 @@ const Portfolio = () => {
   // Form Submission States
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cmsProjects, setCmsProjects] = useState([]);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1400);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    let unsubscribe;
+    let cancelled = false;
+
+    // Loaded dynamically so the Firestore SDK doesn't block the initial
+    // render of the public site — it streams in after first paint.
+    Promise.all([import('./firebase'), import('firebase/firestore')]).then(
+      ([{ db }, { collection, onSnapshot, orderBy, query }]) => {
+        if (cancelled) return;
+        const q = query(collection(db, 'projects'), orderBy('createdAt', 'asc'));
+        unsubscribe = onSnapshot(
+          q,
+          (snapshot) => {
+            const fetched = snapshot.docs
+              .map((doc) => ({
+                id: doc.id,
+                title: doc.data().title,
+                images: (doc.data().images || [])
+                  .filter((img) => img.type !== 'video')
+                  .map((img) => img.url),
+              }))
+              .filter((project) => project.images.length > 0);
+            setCmsProjects(fetched);
+          },
+          () => setCmsProjects([])
+        );
+      }
+    );
+
+    return () => {
+      cancelled = true;
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -81,11 +116,13 @@ const Portfolio = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const projects = [
+  const featuredProjects = [
     { id: 1, title: "CSC HOD GAMES", images: [p1_a, p1_b, p1_c] },
     { id: 2, title: "SHODEINDE HALL WEEK", images: [p2_a, p2_b, p2_c] },
     { id: 3, title: "NACOS JERSEY LAUNCH", images: [p2_d, p2_e, p2_f, p2_g, p2_h, p2_i] },
   ];
+
+  const projects = [...featuredProjects, ...cmsProjects];
 
   // Gallery Navigation Functions
   const nextImage = (e) => {
@@ -288,7 +325,7 @@ const Portfolio = () => {
 
       {/* STATS SECTION */}
       <section className="relative z-10 border-y border-white/10 bg-[#050505]">
-        <div className="max-w-6xl mx-auto px-6 md:px-12 py-16 grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
+        <div className="max-w-4xl mx-auto px-6 md:px-12 py-16 grid grid-cols-3 gap-10 text-center">
           {stats.map((stat) => (
             <div key={stat.label}>
               <Counter value={stat.value} suffix={stat.suffix} />
