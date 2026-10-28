@@ -1,37 +1,40 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/logo.png';
+import { EASE_FILM } from '../lib/motion';
 
-const Preloader = ({ visible }) => {
-  return (
-    <AnimatePresence>
-      {visible && (
+// Brief brand moment on first load. It never blocks for long (see
+// Portfolio.jsx) and lifts like a curtain to reveal the hero.
+const Preloader = ({ visible }) => (
+  <AnimatePresence>
+    {visible && (
+      <motion.div
+        aria-hidden
+        initial={{ clipPath: 'inset(0 0 0% 0)' }}
+        exit={{ clipPath: 'inset(0 0 100% 0)' }}
+        transition={{ duration: 0.9, ease: EASE_FILM }}
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-ink"
+      >
         <motion.div
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: 'easeInOut' }}
-          className="fixed inset-0 z-[100] bg-[#0a0a0a] flex items-center justify-center"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -16 }}
+          transition={{ duration: 0.5, ease: EASE_FILM }}
+          className="flex flex-col items-center gap-5"
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-            className="flex flex-col items-center gap-4"
-          >
-            <img src={logo} alt="Young24KL Visuals" className="h-20 w-20 md:h-24 md:w-24 rounded-full" />
-            <span className="font-display text-3xl md:text-4xl tracking-wide text-white font-bold">
-              YOUNG<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5C06B] to-[#B48C36]">24KL</span>
-            </span>
-            <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 1, ease: 'easeInOut' }}
-              className="h-[2px] w-32 bg-gradient-to-r from-[#E5C06B] to-[#B48C36] origin-left"
-            />
-          </motion.div>
+          <img src={logo} alt="" className="h-20 w-20 rounded-full md:h-24 md:w-24" />
+          <span className="font-display text-3xl font-bold tracking-wide text-bone md:text-4xl">
+            YOUNG<span className="wordmark-gold">24KL</span>
+          </span>
+          <motion.span
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.8, ease: EASE_FILM }}
+            className="h-px w-32 origin-left bg-gold-light"
+          />
         </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
 export default Preloader;

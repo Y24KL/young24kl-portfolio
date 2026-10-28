@@ -1,109 +1,230 @@
 import { useEffect, useState } from 'react';
-import { onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
-import { Loader2, Lock } from 'lucide-react';
+import { onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { collection, doc, getDoc, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { ArrowLeft, Loader2, Lock, LogOut, ShieldAlert } from 'lucide-react';
 
 import { db } from './firebase';
 import { auth } from './firebaseAdmin';
 import AdminDashboard from './AdminDashboard';
+import logo from './assets/logo.png';
+
+// Access model
+// ------------
+// 1. Firebase Auth (email/password) proves who you are.
+// 2. A document at /admins/{uid} in Firestore says you're allowed in.
+// The UI checks (2) only to show the right screen. The real enforcement is in
+// firestore.rules and storage.rules, which reject writes from any UID not in
+// /admins — so tampering with this code cannot grant access.
+
+const AUTH_ERRORS = {
+  'auth/invalid-credential': 'Incorrect email or password.',
+  // Older projects (and the emulator) without email-enumeration protection:
+  'auth/wrong-password': 'Incorrect email or password.',
+  'auth/user-not-found': 'Incorrect email or password.',
+  'auth/invalid-email': 'That email address is not valid.',
+  'auth/user-disabled': 'This account has been disabled.',
+  'auth/too-many-requests': 'Too many attempts. Wait a few minutes, or reset your password.',
+  'auth/network-request-failed': 'Network error. Check your connection and try again.',
+  'auth/operation-not-allowed': 'Email/password sign-in is not enabled for this Firebase project.',
+};
+const authMessage = (error) => AUTH_ERRORS[error?.code] || 'Sign-in failed. Please try again.';
+
+const Shell = ({ children }) => (
+  <main className="relative grid min-h-[100svh] place-items-center overflow-hidden bg-ink px-4 py-12 text-bone">
+    <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/3 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/[0.07] blur-[120px]" />
+    <div className="relative w-full max-w-sm">{children}</div>
+  </main>
+);
+
+const Brand = () => (
+  <div className="mb-8 flex items-center gap-3">
+    <img src={logo} alt="" className="h-10 w-10 rounded-full ring-1 ring-gold/30" />
+    <div>
+      <p className="font-display text-xl font-bold">YOUNG<span className="text-gold-light">24KL</span></p>
+      <p className="text-[11px] uppercase tracking-[0.24em] text-dim">Studio CMS</p>
+    </div>
+  </div>
+);
+
+const inputCls = 'w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-base text-bone outline-none transition focus:border-gold-pale focus:ring-4 focus:ring-gold/10';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [busy, setBusy] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (busy) return;
     setError('');
-    setIsSubmitting(true);
+    setNotice('');
+    setBusy(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch {
-      setError('Invalid email or password.');
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+    } catch (err) {
+      setError(authMessage(err));
     } finally {
-      setIsSubmitting(false);
+      setBusy(false);
     }
   };
 
+  const handleReset = async () => {
+    setError('');
+    setNotice('');
+    if (!email.trim()) { setError('Enter your email above first, then choose “Forgot password”.'); return; }
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+    } catch (err) {
+      if (err?.code === 'auth/invalid-email' || err?.code === 'auth/network-request-failed') { setError(authMessage(err)); return; }
+    }
+    // Same message whether or not the account exists, to avoid revealing which emails are registered.
+    setNotice('If that email belongs to an account, a reset link is on its way.');
+  };
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm bg-[#0f0f0f] border border-white/10 rounded-2xl p-8">
-        <div className="flex items-center gap-2 mb-6 text-[#D4AF37]">
-          <Lock className="w-5 h-5" />
-          <h1 className="text-xl font-bold text-white">Studio CMS Login</h1>
-        </div>
+    <Shell>
+      <form onSubmit={handleSubmit} noValidate className="rounded-2xl border border-white/[0.08] bg-[#0f0f10]/90 p-7 shadow-2xl backdrop-blur-xl sm:p-8">
+        <Brand />
+        <h1 className="mb-1 flex items-center gap-2 text-lg font-semibold"><Lock className="h-4 w-4 text-gold" /> Sign in</h1>
+        <p className="mb-6 text-sm text-dim">Administrators only.</p>
 
-        <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Email</label>
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full bg-[#161616] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-[#D4AF37] outline-none mb-4"
-        />
+        <label htmlFor="admin-email" className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-mist">Email</label>
+        <input id="admin-email" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} className={`${inputCls} mb-4`} />
 
-        <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Password</label>
-        <input
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full bg-[#161616] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-[#D4AF37] outline-none mb-6"
-        />
-
-        {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-gradient-to-r from-[#E5C06B] to-[#B48C36] text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
-        >
-          {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Sign In'}
+        <label htmlFor="admin-password" className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-mist">Password</label>
+        <input id="admin-password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} className={`${inputCls} mb-2`} />
+        <button type="button" onClick={handleReset} className="mb-6 text-xs text-dim underline-offset-4 hover:text-gold-light hover:underline">
+          Forgot password?
         </button>
 
-        <a href="/" className="block text-center text-xs text-gray-500 hover:text-[#D4AF37] mt-6 transition-colors">
-          Back to site
+        <div aria-live="polite">
+          {error && <p role="alert" className="mb-4 rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-200">{error}</p>}
+          {notice && <p className="mb-4 rounded-lg border border-gold/30 bg-gold/10 px-3 py-2.5 text-sm text-bone">{notice}</p>}
+        </div>
+
+        <button type="submit" disabled={busy || !email || !password} className="btn btn-gold w-full !tracking-[0.1em]">
+          {busy ? <><Loader2 className="h-4 w-4 animate-spin" /> Signing in…</> : 'Sign in'}
+        </button>
+
+        <a href="/" className="mt-6 inline-flex items-center gap-1.5 text-xs text-dim transition-colors hover:text-gold-light">
+          <ArrowLeft className="h-3.5 w-3.5" /> Back to site
         </a>
       </form>
+    </Shell>
+  );
+};
+
+const FullScreenLoader = ({ label }) => (
+  <div className="grid min-h-[100svh] place-items-center bg-ink">
+    <div className="flex flex-col items-center gap-3 text-sm text-dim">
+      <Loader2 className="h-7 w-7 animate-spin text-gold" />
+      {label}
     </div>
+  </div>
+);
+
+const NotAuthorized = ({ user, reason, onRetry }) => (
+  <Shell>
+    <div className="rounded-2xl border border-white/[0.08] bg-[#0f0f10]/90 p-8 shadow-2xl">
+      <Brand />
+      <h1 className="flex items-center gap-2 text-lg font-semibold">
+        <ShieldAlert className="h-5 w-5 text-red-300" />
+        {reason === 'error' ? 'Couldn’t verify access' : 'No admin access'}
+      </h1>
+      <p className="mt-3 text-sm leading-relaxed text-mist">
+        {reason === 'error' ? (
+          <>We couldn’t check whether <span className="text-bone">{user.email}</span> is an administrator. Check your connection and try again.</>
+        ) : (
+          <>You’re signed in as <span className="text-bone">{user.email}</span>, but this account isn’t on the studio’s administrator list. Ask the site owner to add your account, then sign in again.</>
+        )}
+      </p>
+      <div className="mt-6 flex flex-col gap-2">
+        {reason === 'error' && <button type="button" onClick={onRetry} className="btn btn-gold w-full">Try again</button>}
+        <button type="button" onClick={() => signOut(auth)} className="btn btn-ghost w-full">
+          <LogOut className="h-4 w-4" /> Sign out
+        </button>
+        <a href="/" className="mt-2 text-center text-xs text-dim hover:text-gold-light">Back to site</a>
+      </div>
+    </div>
+  </Shell>
+);
+
+// Subscribes to every project once access is confirmed.
+function useProjects(enabled) {
+  const [state, setState] = useState({ status: 'loading', projects: [], error: null });
+
+  useEffect(() => {
+    if (!enabled) return;
+    const q = query(collection(db, 'projects'), orderBy('createdAt', 'asc'));
+    return onSnapshot(
+      q,
+      (snapshot) => setState({
+        status: 'ready',
+        projects: snapshot.docs.map((d) => ({ id: d.id, ...d.data() })),
+        error: null,
+      }),
+      (error) => {
+        console.error('Projects listener failed:', error);
+        setState((s) => ({ ...s, status: 'error', error: error.message }));
+      }
+    );
+  }, [enabled]);
+
+  return state;
+}
+
+const AdminSession = ({ user }) => {
+  const [access, setAccess] = useState('checking'); // checking | admin | denied | error
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    getDoc(doc(db, 'admins', user.uid))
+      .then((snap) => { if (!cancelled) setAccess(snap.exists() ? 'admin' : 'denied'); })
+      .catch((error) => {
+        console.error('Admin check failed:', error);
+        if (!cancelled) setAccess(error.code === 'permission-denied' ? 'denied' : 'error');
+      });
+    return () => { cancelled = true; };
+  }, [user.uid, attempt]);
+
+  const projects = useProjects(access === 'admin');
+
+  if (access === 'checking') return <FullScreenLoader label="Checking access…" />;
+  if (access !== 'admin') {
+    return <NotAuthorized user={user} reason={access} onRetry={() => { setAccess('checking'); setAttempt((n) => n + 1); }} />;
+  }
+
+  return (
+    <AdminDashboard
+      user={user}
+      projects={projects.projects}
+      status={projects.status}
+      loadError={projects.error}
+      onSignOut={() => signOut(auth)}
+    />
   );
 };
 
 const Admin = () => {
   const [user, setUser] = useState(undefined);
-  const [projects, setProjects] = useState([]);
 
   useEffect(() => {
-    return onAuthStateChanged(auth, setUser);
+    document.title = 'Studio CMS | Young24KL';
+    const robots = document.createElement('meta');
+    robots.name = 'robots';
+    robots.content = 'noindex, nofollow';
+    document.head.appendChild(robots);
+    const unsubscribe = onAuthStateChanged(auth, setUser);
+    return () => { unsubscribe(); robots.remove(); };
   }, []);
 
-  useEffect(() => {
-    if (!user) return;
-    const q = query(collection(db, 'projects'), orderBy('createdAt', 'asc'));
-    return onSnapshot(q, (snapshot) => {
-      setProjects(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    });
-  }, [user]);
-
-  if (user === undefined) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[#D4AF37] animate-spin" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <LoginForm />;
-  }
-
-  return (
-    <AdminDashboard
-      projects={projects}
-      onExit={() => { window.location.href = '/'; }}
-    />
-  );
+  if (user === undefined) return <FullScreenLoader label="Loading…" />;
+  if (!user) return <LoginForm />;
+  // Keyed by UID so switching accounts never leaks the previous session's state.
+  return <AdminSession key={user.uid} user={user} />;
 };
 
 export default Admin;

@@ -1,9 +1,44 @@
 rules_version = '2';
+
+// Least-privilege rules for the Young24KL CMS.
+//
+// - Anyone may read published projects (the public portfolio).
+// - Only administrators may write. An administrator is a signed-in user whose
+//   UID has a document at /admins/{uid}. Being signed in is NOT enough:
+//   Firebase Auth lets anyone with the public web config create an account
+//   unless sign-ups are disabled, so `request.auth != null` alone is unsafe.
+// - /admins can only be managed from the Firebase Console or Admin SDK.
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isValidProject(data) {
+      return data.keys().hasOnly(['title', 'description', 'category', 'images', 'createdAt', 'updatedAt'])
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 120
+        && data.images is list && data.images.size() <= 200
+        && data.createdAt is string
+        && (!('description' in data) || (data.description is string && data.description.size() <= 2000))
+        && (!('category' in data) || (data.category is string && data.category.size() <= 60))
+        && (!('updatedAt' in data) || data.updatedAt is string);
+    }
+
     match /projects/{projectId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow create: if isAdmin() && isValidProject(request.resource.data);
+      allow update: if isAdmin()
+        && isValidProject(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin();
+    }
+
+    match /admins/{uid} {
+      // A signed-in user may check whether they themselves are an admin.
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
     }
   }
 }
