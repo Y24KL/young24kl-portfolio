@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, Menu, X } from 'lucide-react';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo.webp';
 import { EASE } from '../lib/motion';
 import { useModal } from '../lib/useModal';
 import { INSTAGRAM_URL } from '../data/content';
@@ -21,10 +21,10 @@ export const Wordmark = ({ size = 'md' }) => (
       alt=""
       width="40"
       height="40"
-      className={`${size === 'lg' ? 'h-12 w-12' : 'h-9 w-9'} rounded-full ring-1 ring-gold/30`}
+      className={size === 'lg' ? 'h-12 w-12' : 'h-10 w-10'}
     />
-    <span className={`font-display ${size === 'lg' ? 'text-3xl' : 'text-xl'} font-bold tracking-wide text-bone`}>
-      YOUNG<span className="wordmark-gold">24KL</span>
+    <span className={`flex items-baseline font-display ${size === 'lg' ? 'text-3xl' : 'text-xl'} font-bold tracking-wide`}>
+      <span className="wordmark-gold">24KL</span><span className="ml-2 font-sans text-[0.5em] font-semibold tracking-[0.34em] text-bone">VISUALS</span>
     </span>
   </span>
 );
@@ -138,7 +138,7 @@ const Navbar = () => {
                 : 'border border-transparent'
             }`}
           >
-            <a href="#home" aria-label="Young24KL Studios, back to top" className="rounded-full">
+            <a href="#home" aria-label="24KL Visuals, back to top" className="rounded-full">
               <Wordmark />
             </a>
 

@@ -103,7 +103,7 @@ export const stats = [
 
 export const testimonials = [
   {
-    quote: 'Young24KL turned our HOD games into something that looked straight out of a sports network broadcast. Every frame had energy.',
+    quote: '24KL Visuals turned our HOD games into something that looked straight out of a sports network broadcast. Every frame had energy.',
     name: 'Event Committee',
     role: 'CSC HOD Games',
   },

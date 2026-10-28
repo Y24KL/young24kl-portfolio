@@ -1,4 +1,4 @@
-# Young24KL Studios / 24KL Visuals — portfolio & Studio CMS
+# 24KL Visuals — portfolio & Studio CMS
 
 React 19 + Vite + Tailwind CSS 4 + Framer Motion, with Firebase (Firestore, Auth, Storage) for the `/admin` CMS.
 

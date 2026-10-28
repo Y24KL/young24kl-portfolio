@@ -37,7 +37,7 @@ const Founder = () => (
         </motion.p>
         <motion.p variants={reveal} className="mt-6 max-w-xl text-lg leading-relaxed text-mist">
           With years of experience pushing the boundaries of digital media, our CEO established
-          Young24KL Studios to bridge the gap between imagination and reality. Known for a
+          24KL Visuals to bridge the gap between imagination and reality. Known for a
           meticulous eye for detail and an uncompromising standard of excellence.
         </motion.p>
       </motion.div>

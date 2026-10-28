@@ -31,7 +31,7 @@ const Footer = () => (
 
       <div className="grid gap-12 py-16 md:grid-cols-12">
         <div className="md:col-span-6">
-          <a href="#home" aria-label="Young24KL Studios, back to top" className="inline-block rounded-full">
+          <a href="#home" aria-label="24KL Visuals, back to top" className="inline-block rounded-full">
             <Wordmark />
           </a>
           <p className="mt-5 max-w-sm leading-relaxed text-dim">
@@ -79,7 +79,7 @@ const Footer = () => (
 
     <div className="border-t border-white/[0.06]">
       <div className="container-x flex flex-col-reverse items-center justify-between gap-4 py-6 text-xs tracking-wide text-dim md:flex-row">
-        <p>© {new Date().getFullYear()} Young24KL Studios. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} 24KL Visuals. All rights reserved.</p>
         <a href="#home" className="inline-flex min-h-11 items-center gap-2 transition-colors hover:text-gold-light">
           Back to top <ArrowUp className="h-4 w-4" />
         </a>

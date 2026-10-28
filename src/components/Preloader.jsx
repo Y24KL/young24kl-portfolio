@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo.webp';
 import { EASE_FILM } from '../lib/motion';
 
 // Brief brand moment on first load. It never blocks for long (see
@@ -21,10 +21,7 @@ const Preloader = ({ visible }) => (
           transition={{ duration: 0.5, ease: EASE_FILM }}
           className="flex flex-col items-center gap-5"
         >
-          <img src={logo} alt="" className="h-20 w-20 rounded-full md:h-24 md:w-24" />
-          <span className="font-display text-3xl font-bold tracking-wide text-bone md:text-4xl">
-            YOUNG<span className="wordmark-gold">24KL</span>
-          </span>
+          <img src={logo} alt="" className="h-40 w-40 md:h-48 md:w-48" />
           <motion.span
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}

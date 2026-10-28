@@ -24,7 +24,7 @@ const Vision = () => {
             We don't just capture moments; we <em className="italic text-gold-light">architect cinematic experiences.</em>
           </motion.h2>
           <motion.p variants={reveal} className="mt-10 max-w-xl text-lg leading-relaxed text-mist">
-            At Young24KL Studios, we were born from a passion for visual storytelling. Our studio
+            At 24KL Visuals, we were born from a passion for visual storytelling. Our studio
             merges high-end technology with raw creative intuition.
           </motion.p>
 

@@ -156,7 +156,7 @@ const Hero = () => {
           transition={{ duration: 0.9, ease: EASE, delay: 0.15 }}
           className="eyebrow mb-7"
         >
-          Young24KL Studios · 24KL Visuals
+          24KL Visuals
         </motion.p>
 
         <motion.h1

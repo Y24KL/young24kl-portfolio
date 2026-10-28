@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Photo from './Photo';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo.webp';
 import { EASE, inView, reveal, stagger, useFinePointer } from '../lib/motion';
 import { services } from '../data/content';
 
@@ -10,7 +10,7 @@ const Visual = ({ service, className = '' }) =>
     <Photo image={service.image} alt="" sizes="(min-width: 1024px) 30vw, 40vw" className={className} />
   ) : (
     <div className={`grid place-items-center bg-[radial-gradient(circle_at_50%_40%,rgb(212_175_55/0.18),transparent_65%)] bg-charcoal ${className}`}>
-      <img src={logo} alt="" className="w-2/5 rounded-full opacity-90" loading="lazy" />
+      <img src={logo} alt="" className="w-1/2" loading="lazy" />
     </div>
   );
 

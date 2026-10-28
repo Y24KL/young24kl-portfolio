@@ -6,7 +6,7 @@ import { ArrowLeft, Loader2, Lock, LogOut, ShieldAlert } from 'lucide-react';
 import { db } from './firebase';
 import { auth } from './firebaseAdmin';
 import AdminDashboard from './AdminDashboard';
-import logo from './assets/logo.png';
+import logo from './assets/logo.webp';
 
 // Access model
 // ------------
@@ -38,9 +38,9 @@ const Shell = ({ children }) => (
 
 const Brand = () => (
   <div className="mb-8 flex items-center gap-3">
-    <img src={logo} alt="" className="h-10 w-10 rounded-full ring-1 ring-gold/30" />
+    <img src={logo} alt="" className="h-11 w-11" />
     <div>
-      <p className="font-display text-xl font-bold">YOUNG<span className="text-gold-light">24KL</span></p>
+      <p className="font-display text-xl font-bold"><span className="text-gold-light">24KL</span> <span className="font-sans text-[0.6em] font-semibold tracking-[0.3em]">VISUALS</span></p>
       <p className="text-[11px] uppercase tracking-[0.24em] text-dim">Studio CMS</p>
     </div>
   </div>
@@ -125,31 +125,68 @@ const FullScreenLoader = ({ label }) => (
   </div>
 );
 
-const NotAuthorized = ({ user, reason, onRetry }) => (
-  <Shell>
-    <div className="rounded-2xl border border-white/[0.08] bg-[#0f0f10]/90 p-8 shadow-2xl">
-      <Brand />
-      <h1 className="flex items-center gap-2 text-lg font-semibold">
-        <ShieldAlert className="h-5 w-5 text-red-300" />
-        {reason === 'error' ? 'Couldn’t verify access' : 'No admin access'}
-      </h1>
-      <p className="mt-3 text-sm leading-relaxed text-mist">
-        {reason === 'error' ? (
-          <>We couldn’t check whether <span className="text-bone">{user.email}</span> is an administrator. Check your connection and try again.</>
-        ) : (
-          <>You’re signed in as <span className="text-bone">{user.email}</span>, but this account isn’t on the studio’s administrator list. Ask the site owner to add your account, then sign in again.</>
+const COPY = {
+  denied: {
+    title: 'No admin access',
+    body: (email) => <>You’re signed in as <span className="text-bone">{email}</span>, but this account isn’t on the administrator list. In the Firebase Console, add a document to the <code className="text-bone">admins</code> collection whose ID is the user ID below, then try again.</>,
+  },
+  // Firestore refused even to let us read our own /admins entry. With the
+  // rules in this repo that can't happen, so the deployed rules are older.
+  blocked: {
+    title: 'Access check blocked',
+    body: () => <>Firestore’s security rules blocked the admin check. This usually means the rules in this repository haven’t been deployed yet. Run <code className="text-bone">npx firebase-tools deploy --only firestore:rules --project young24kl</code>, make sure your user ID below is in the <code className="text-bone">admins</code> collection, then try again.</>,
+  },
+  error: {
+    title: 'Couldn’t verify access',
+    body: (email) => <>We couldn’t check whether <span className="text-bone">{email}</span> is an administrator. Check your connection and try again.</>,
+  },
+};
+
+const NotAuthorized = ({ user, reason, onRetry }) => {
+  const [copied, setCopied] = useState(false);
+  const { title, body } = COPY[reason] || COPY.error;
+
+  const copyUid = async () => {
+    try {
+      await navigator.clipboard.writeText(user.uid);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* clipboard unavailable; the ID is selectable */ }
+  };
+
+  return (
+    <Shell>
+      <div className="rounded-2xl border border-white/[0.08] bg-[#0f0f10]/90 p-8 shadow-2xl">
+        <Brand />
+        <h1 className="flex items-center gap-2 text-lg font-semibold">
+          <ShieldAlert className="h-5 w-5 text-red-300" />
+          {title}
+        </h1>
+        <p className="mt-3 text-sm leading-relaxed text-mist">{body(user.email)}</p>
+
+        {reason !== 'error' && (
+          <div className="mt-5">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-dim">Your user ID</p>
+            <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/40 p-2 pl-3">
+              <code className="min-w-0 flex-1 select-all break-all text-xs text-bone">{user.uid}</code>
+              <button type="button" onClick={copyUid} className="shrink-0 rounded-md px-2.5 py-1.5 text-xs font-semibold text-gold-light hover:bg-white/5">
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+          </div>
         )}
-      </p>
-      <div className="mt-6 flex flex-col gap-2">
-        {reason === 'error' && <button type="button" onClick={onRetry} className="btn btn-gold w-full">Try again</button>}
-        <button type="button" onClick={() => signOut(auth)} className="btn btn-ghost w-full">
-          <LogOut className="h-4 w-4" /> Sign out
-        </button>
-        <a href="/" className="mt-2 text-center text-xs text-dim hover:text-gold-light">Back to site</a>
+
+        <div className="mt-6 flex flex-col gap-2">
+          <button type="button" onClick={onRetry} className="btn btn-gold w-full">Try again</button>
+          <button type="button" onClick={() => signOut(auth)} className="btn btn-ghost w-full">
+            <LogOut className="h-4 w-4" /> Sign out
+          </button>
+          <a href="/" className="mt-2 text-center text-xs text-dim hover:text-gold-light">Back to site</a>
+        </div>
       </div>
-    </div>
-  </Shell>
-);
+    </Shell>
+  );
+};
 
 // Subscribes to every project once access is confirmed.
 function useProjects(enabled) {
@@ -176,7 +213,7 @@ function useProjects(enabled) {
 }
 
 const AdminSession = ({ user }) => {
-  const [access, setAccess] = useState('checking'); // checking | admin | denied | error
+  const [access, setAccess] = useState('checking'); // checking | admin | denied | blocked | error
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
@@ -185,7 +222,7 @@ const AdminSession = ({ user }) => {
       .then((snap) => { if (!cancelled) setAccess(snap.exists() ? 'admin' : 'denied'); })
       .catch((error) => {
         console.error('Admin check failed:', error);
-        if (!cancelled) setAccess(error.code === 'permission-denied' ? 'denied' : 'error');
+        if (!cancelled) setAccess(error.code === 'permission-denied' ? 'blocked' : 'error');
       });
     return () => { cancelled = true; };
   }, [user.uid, attempt]);
@@ -212,7 +249,7 @@ const Admin = () => {
   const [user, setUser] = useState(undefined);
 
   useEffect(() => {
-    document.title = 'Studio CMS | Young24KL';
+    document.title = 'Studio CMS | 24KL Visuals';
     const robots = document.createElement('meta');
     robots.name = 'robots';
     robots.content = 'noindex, nofollow';

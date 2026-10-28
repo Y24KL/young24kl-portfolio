@@ -11,7 +11,7 @@ import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebas
 import { db } from './firebase';
 import { storage } from './firebaseAdmin';
 
-import logo from './assets/logo.png';
+import logo from './assets/logo.webp';
 import { Spinner, Toasts } from './admin/ui';
 import { useConfirm, useToasts } from './admin/hooks';
 import { LIMITS, normalizeTitle, storagePathFor, validateProjectFields, validateUpload } from './lib/projects';
@@ -449,8 +449,8 @@ const AdminDashboard = ({ user, projects, status, loadError, onSignOut }) => {
       <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-[#08080a]/85 backdrop-blur-xl">
         <div className="flex h-16 items-center justify-between gap-4 px-4 md:px-6">
           <div className="flex items-center gap-3">
-            <img src={logo} alt="" className="h-8 w-8 rounded-full ring-1 ring-gold/30" />
-            <p className="font-display text-lg font-bold">YOUNG<span className="text-gold-light">24KL</span> <span className="ml-1 font-sans text-xs font-medium uppercase tracking-[0.2em] text-dim">CMS</span></p>
+            <img src={logo} alt="" className="h-9 w-9" />
+            <p className="font-display text-lg font-bold"><span className="text-gold-light">24KL</span> <span className="font-sans text-[0.6em] font-semibold tracking-[0.3em]">VISUALS</span> <span className="ml-1 font-sans text-xs font-medium uppercase tracking-[0.2em] text-dim">CMS</span></p>
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
             <span className="hidden max-w-[16rem] truncate text-xs text-dim md:block">{user.email}</span>
