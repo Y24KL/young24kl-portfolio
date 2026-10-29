@@ -134,7 +134,7 @@ const Work = ({ projects, status }) => {
             <AnimatePresence mode="popLayout">
               {visible.map((project, i) => (
                 <motion.li
-                  key={project.id}
+                  key={project.key || project.id}
                   layout
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}

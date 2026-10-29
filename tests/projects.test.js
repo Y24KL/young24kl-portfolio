@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fromCmsDoc, mergeProjects, storagePathFor, validateProjectFields, validateUpload } from '../src/lib/projects';
+import { featuredToCmsDoc, fromCmsDoc, mergeProjects, storagePathFor, validateProjectFields, validateUpload } from '../src/lib/projects';
 
 const featured = [
   { id: 'f1', title: 'CSC HOD GAMES', category: 'Sports', media: [{ type: 'image', src: 'a.webp' }] },
@@ -49,6 +49,32 @@ describe('mergeProjects', () => {
     const videoOnly = cms('c3', 'Film Only', [{ url: 'https://x/v.mp4', type: 'video' }]);
     const empty = cms('c4', 'Empty', []);
     expect(mergeProjects(featured, [videoOnly, empty]).map((p) => p.id)).toEqual(['f1', 'f2']);
+  });
+});
+
+describe('built-in project import', () => {
+  const builtIn = {
+    id: 'featured-x', title: 'CSC HOD GAMES', category: 'Sports', description: '',
+    media: [{ id: 'IMG_1', type: 'image', src: '/portfolio/IMG_1-1280.webp', full: '/portfolio/IMG_1-2048.webp', srcSet: 'a 640w', placeholder: '/portfolio/IMG_1-lqip.webp', width: 3456, height: 5184 }],
+  };
+
+  it('round-trips through Firestore without losing order or renditions', () => {
+    const data = featuredToCmsDoc(builtIn, '2026-01-01T00:00:00.000Z');
+    expect(Object.keys(data).sort()).toEqual(['category', 'createdAt', 'description', 'images', 'title', 'updatedAt']);
+    const back = fromCmsDoc('c9', data);
+    expect(back.media[0]).toMatchObject({ src: builtIn.media[0].src, full: builtIn.media[0].full, srcSet: 'a 640w', width: 3456, height: 5184 });
+  });
+
+  it('keeps the built-in card key so the gallery does not remount', () => {
+    const cmsCopy = fromCmsDoc('c9', featuredToCmsDoc(builtIn, '2026-01-01'));
+    expect(mergeProjects([builtIn], [cmsCopy])[0]).toMatchObject({ id: 'c9', key: 'featured-x' });
+  });
+
+  // Regression: deleting an imported project in the CMS must remove it from the
+  // site, not bring the built-in version back.
+  it('stops showing built-in projects once imported', () => {
+    expect(mergeProjects(featured, [], { featuredImported: true })).toEqual([]);
+    expect(mergeProjects(featured, [cms('c1', 'Night Market')], { featuredImported: true }).map((p) => p.id)).toEqual(['c1']);
   });
 });
 

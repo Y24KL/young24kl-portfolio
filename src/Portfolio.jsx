@@ -40,41 +40,48 @@ function useIntro() {
   return visible;
 }
 
-// Live CMS projects from Firestore. The SDK is loaded after first paint so it
-// never delays the hero.
+// Live CMS projects (and the site settings flag) from Firestore. The SDK is
+// loaded after first paint so it never delays the hero.
 function useCmsProjects() {
-  const [state, setState] = useState({ status: 'loading', projects: [] });
+  const [state, setState] = useState({ status: 'loading', projects: [], featuredImported: false });
 
   useEffect(() => {
-    let unsubscribe;
+    const unsubscribers = [];
     let cancelled = false;
+    const fail = (error) => {
+      console.error('Could not load CMS projects:', error);
+      if (!cancelled) setState((s) => ({ ...s, status: 'error' }));
+    };
 
     Promise.all([import('./firebase'), import('firebase/firestore')])
-      .then(([{ db }, { collection, onSnapshot, orderBy, query }]) => {
+      .then(([{ db }, { collection, doc, onSnapshot, orderBy, query }]) => {
         if (cancelled) return;
-        const q = query(collection(db, 'projects'), orderBy('createdAt', 'asc'));
-        unsubscribe = onSnapshot(
-          q,
-          (snapshot) => {
-            setState({
-              status: 'ready',
-              projects: snapshot.docs.map((doc) => fromCmsDoc(doc.id, doc.data())),
-            });
-          },
-          (error) => {
-            console.error('Could not load CMS projects:', error);
-            setState({ status: 'error', projects: [] });
-          }
+        let projects = null;
+        let settings = null;
+        // Only report "ready" once both have arrived, so built-in projects
+        // never flash before the CMS copies replace them.
+        const publish = () => {
+          if (projects && settings) setState({ status: 'ready', projects, featuredImported: settings.featuredImported === true });
+        };
+        unsubscribers.push(
+          onSnapshot(
+            query(collection(db, 'projects'), orderBy('createdAt', 'asc')),
+            (snapshot) => { projects = snapshot.docs.map((d) => fromCmsDoc(d.id, d.data())); publish(); },
+            fail
+          ),
+          onSnapshot(
+            doc(db, 'settings', 'site'),
+            (snap) => { settings = snap.data() || {}; publish(); },
+            // Older rules without /settings: behave as "not imported".
+            () => { settings = {}; publish(); }
+          )
         );
       })
-      .catch((error) => {
-        console.error('Could not load Firebase:', error);
-        if (!cancelled) setState({ status: 'error', projects: [] });
-      });
+      .catch(fail);
 
     return () => {
       cancelled = true;
-      if (unsubscribe) unsubscribe();
+      unsubscribers.forEach((u) => u());
     };
   }, []);
 
@@ -115,7 +122,10 @@ const BackToTop = () => {
 const Portfolio = () => {
   const intro = useIntro();
   const cms = useCmsProjects();
-  const projects = useMemo(() => mergeProjects(featuredProjects, cms.projects), [cms.projects]);
+  const projects = useMemo(
+    () => mergeProjects(featuredProjects, cms.projects, { featuredImported: cms.featuredImported }),
+    [cms.projects, cms.featuredImported]
+  );
 
   return (
     <div className="min-h-screen overflow-x-clip bg-ink font-sans text-bone">

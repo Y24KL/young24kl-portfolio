@@ -83,6 +83,22 @@ describe('projects collection', () => {
   });
 });
 
+describe('settings collection', () => {
+  const flag = { featuredImported: true, updatedAt: '2026-01-01T00:00:00.000Z' };
+
+  it('is publicly readable', async () => {
+    await assertSucceeds(getDoc(doc(anonDb(), 'settings', 'site')));
+  });
+
+  it('can only be written by admins, with known fields', async () => {
+    await assertFails(setDoc(doc(userDb(), 'settings', 'site'), flag));
+    await assertFails(setDoc(doc(anonDb(), 'settings', 'site'), flag));
+    await assertSucceeds(setDoc(doc(adminDb(), 'settings', 'site'), flag));
+    await assertFails(setDoc(doc(adminDb(), 'settings', 'site'), { ...flag, theme: 'red' }));
+    await assertFails(setDoc(doc(adminDb(), 'settings', 'site'), { featuredImported: 'yes' }));
+  });
+});
+
 describe('admins collection', () => {
   it('lets a user check only their own admin status', async () => {
     await assertSucceeds(getDoc(doc(adminDb(), 'admins', ADMIN_UID)));

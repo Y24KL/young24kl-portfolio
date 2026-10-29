@@ -1,12 +1,12 @@
 import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  AlertTriangle, ArrowLeft, ArrowRight, ExternalLink, Film, FolderPlus, Image as ImageIcon,
+  AlertTriangle, ArrowLeft, Download, ArrowRight, ExternalLink, Film, FolderPlus, Image as ImageIcon,
   LayoutGrid, LogOut, RefreshCw, Save, Star, Trash2, UploadCloud,
 } from 'lucide-react';
 
 // Firebase Imports
-import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { db } from './firebase';
 import { storage } from './firebaseAdmin';
@@ -14,7 +14,8 @@ import { storage } from './firebaseAdmin';
 import logo from './assets/logo.webp';
 import { Spinner, Toasts } from './admin/ui';
 import { useConfirm, useToasts } from './admin/hooks';
-import { LIMITS, normalizeTitle, storagePathFor, validateProjectFields, validateUpload } from './lib/projects';
+import { LIMITS, featuredToCmsDoc, normalizeTitle, storagePathFor, validateProjectFields, validateUpload } from './lib/projects';
+import { featuredProjects } from './data/content';
 
 const now = () => new Date().toISOString();
 const LAYOUT_SIZES = ['standard', 'wide', 'tall'];
@@ -411,9 +412,72 @@ const MediaGrid = ({ project, push, confirm }) => {
   );
 };
 
+/* ---------------------------------------------------------------- Import */
+
+// One-time move of the built-in projects into the CMS. Their photos stay at
+// /portfolio/... (shipped with the site), so this works without Storage.
+// Projects plus the settings flag are written in a single atomic batch.
+const ImportBuiltIn = ({ projects, push, onImported }) => {
+  const [busy, setBusy] = useState(false);
+  const existing = new Set(projects.map((p) => normalizeTitle(p.title)));
+  const missing = featuredProjects.filter((p) => !existing.has(normalizeTitle(p.title)));
+
+  const run = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      // Place them before any existing collections, keeping their order.
+      const earliest = projects.reduce((min, p) => Math.min(min, Date.parse(p.createdAt) || Infinity), Date.now());
+      const batch = writeBatch(db);
+      let firstId = null;
+      missing.forEach((project, i) => {
+        const ref = doc(collection(db, 'projects'));
+        firstId ??= ref.id;
+        const createdAt = new Date(earliest - (missing.length - i) * 1000).toISOString();
+        batch.set(ref, featuredToCmsDoc(project, createdAt));
+      });
+      batch.set(doc(db, 'settings', 'site'), { featuredImported: true, updatedAt: now() });
+      await batch.commit();
+      push('success', missing.length
+        ? `Imported ${missing.length} project${missing.length === 1 ? '' : 's'}. They’re now fully editable here.`
+        : 'Built-in projects are now managed here.');
+      if (firstId) onImported(firstId);
+    } catch (err) {
+      push('error', `Import failed — nothing was changed. ${explain(err)}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="mb-8 rounded-2xl border border-gold/25 bg-gold/[0.05] p-5 md:p-6">
+      <h2 className="flex items-center gap-2 font-semibold text-bone">
+        <Download className="h-4 w-4 text-gold" /> Your built-in projects aren’t editable yet
+      </h2>
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-mist">
+        {featuredProjects.map((p) => p.title).join(', ')} ship with the website itself, so they don’t appear in this list.
+        Import them once to rename, reorder, re-cover or delete them here. The public site will look the same.
+      </p>
+      <button
+        type="button"
+        onClick={run}
+        disabled={busy}
+        className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg bg-gold-light px-4 text-sm font-semibold text-ink transition hover:bg-gold disabled:opacity-50"
+      >
+        {busy ? <Spinner /> : <Download className="h-4 w-4" />}
+        {busy
+          ? 'Importing…'
+          : missing.length
+            ? `Import ${missing.length} built-in project${missing.length === 1 ? '' : 's'}`
+            : 'Manage them here'}
+      </button>
+    </div>
+  );
+};
+
 /* ------------------------------------------------------------- Dashboard */
 
-const AdminDashboard = ({ user, projects, status, loadError, onSignOut }) => {
+const AdminDashboard = ({ user, projects, status, loadError, featuredImported, onSignOut }) => {
   const { toasts, push, dismiss } = useToasts();
   const confirm = useConfirm();
   const [activeId, setActiveId] = useState(null);
@@ -519,7 +583,12 @@ const AdminDashboard = ({ user, projects, status, loadError, onSignOut }) => {
               <div className="h-10 w-72 animate-pulse rounded-lg bg-white/[0.04]" />
               <div className="h-40 animate-pulse rounded-2xl bg-white/[0.03]" />
             </div>
-          ) : active ? (
+          ) : (
+            <>
+          {status === 'ready' && featuredImported === false && (
+            <ImportBuiltIn projects={projects} push={push} onImported={setActiveId} />
+          )}
+          {active ? (
             <div className="space-y-8">
               <div className="flex flex-col gap-4 border-b border-white/[0.06] pb-6 sm:flex-row sm:items-end sm:justify-between">
                 <div className="min-w-0">
@@ -548,11 +617,13 @@ const AdminDashboard = ({ user, projects, status, loadError, onSignOut }) => {
           ) : (
             <div className="flex flex-col items-center py-24 text-center">
               <LayoutGrid className="mb-4 h-12 w-12 text-graphite" />
-              <h1 className="text-xl font-semibold text-mist">Create your first collection</h1>
+              <h1 className="text-xl font-semibold text-mist">No collections yet</h1>
               <p className="mt-2 max-w-sm text-sm text-dim">
-                The three featured projects ship with the site. Collections created here appear after them on the public portfolio.
+                Import your built-in projects above, or create a new collection from the sidebar.
               </p>
             </div>
+          )}
+            </>
           )}
         </main>
       </div>

@@ -19,10 +19,14 @@ React 19 + Vite + Tailwind CSS 4 + Framer Motion, with Firebase (Firestore, Auth
 ## Adding photos to the bundled site
 
 1. Drop the full-resolution JPG into `src/assets/`.
-2. Run `npm run images` — it writes `src/assets/optimized/<name>-{640,1280,2048}.webp`, a blur placeholder and `manifest.json`.
+2. Run `npm run images` — it writes `public/portfolio/<name>-{640,1280,2048}.webp`, a blur placeholder, and updates `src/data/photo-manifest.json`.
 3. Reference it with `photo('<name>', 'alt text')` in `src/data/content.js`.
 
-The JPG masters are never shipped; only the WebP renditions are bundled.
+The JPG masters are never shipped; only the WebP renditions are served, from stable `/portfolio/...` URLs.
+
+## Built-in projects and the CMS
+
+CSC HOD Games, Shodeinde Hall Week and NACOS Jersey Launch ship with the site (`featuredProjects` in `src/data/content.js`). Until they are imported, `/admin` shows an **Import built-in projects** card. Importing writes them to Firestore (pointing at the `/portfolio/...` photos, so no Storage is needed) and sets `settings/site.featuredImported = true`. From then on the CMS is the only source: edits, reordering and deletions apply to the public site.
 
 ## Firebase setup (required for the CMS to work in production)
 
@@ -35,6 +39,7 @@ The repository's rules are **not live until deployed**. As of this change the de
    ```bash
    npx firebase-tools deploy --only firestore:rules,storage --project young24kl
    ```
+   Use `--only firestore:rules` until Storage is enabled.
    Storage rules read `/admins` from Firestore; the first deploy asks to grant Storage that permission — accept it.
 
 ## Hosting

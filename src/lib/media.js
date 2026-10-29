@@ -1,9 +1,10 @@
 // Resolves a studio photo (by its source file name, e.g. "IMG_9204") to the
-// responsive WebP renditions produced by `npm run images`.
-import manifest from '../assets/optimized/manifest.json';
+// responsive WebP renditions produced by `npm run images`. Renditions live in
+// public/portfolio under stable URLs, so the same files can be referenced from
+// CMS documents (see the built-in project import in /admin).
+import manifest from '../data/photo-manifest.json';
 
-const files = import.meta.glob('../assets/optimized/*.webp', { eager: true, import: 'default' });
-const file = (name, suffix) => files[`../assets/optimized/${name}-${suffix}.webp`];
+const file = (name, suffix) => `/portfolio/${name}-${suffix}.webp`;
 
 export function photo(name, alt = '') {
   const meta = manifest[name];

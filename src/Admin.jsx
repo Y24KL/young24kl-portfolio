@@ -212,6 +212,20 @@ function useProjects(enabled) {
   return state;
 }
 
+// settings/site.featuredImported, or null until known.
+function useFeaturedImported(enabled) {
+  const [imported, setImported] = useState(null);
+  useEffect(() => {
+    if (!enabled) return;
+    return onSnapshot(
+      doc(db, 'settings', 'site'),
+      (snap) => setImported(snap.data()?.featuredImported === true),
+      (error) => console.error('Settings listener failed:', error)
+    );
+  }, [enabled]);
+  return imported;
+}
+
 const AdminSession = ({ user }) => {
   const [access, setAccess] = useState('checking'); // checking | admin | denied | blocked | error
   const [attempt, setAttempt] = useState(0);
@@ -228,6 +242,7 @@ const AdminSession = ({ user }) => {
   }, [user.uid, attempt]);
 
   const projects = useProjects(access === 'admin');
+  const featuredImported = useFeaturedImported(access === 'admin');
 
   if (access === 'checking') return <FullScreenLoader label="Checking access…" />;
   if (access !== 'admin') {
@@ -240,6 +255,7 @@ const AdminSession = ({ user }) => {
       projects={projects.projects}
       status={projects.status}
       loadError={projects.error}
+      featuredImported={featuredImported}
       onSignOut={() => signOut(auth)}
     />
   );

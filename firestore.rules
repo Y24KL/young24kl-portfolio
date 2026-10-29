@@ -35,6 +35,14 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Site-wide CMS flags, e.g. whether the built-in projects were imported.
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin()
+        && request.resource.data.keys().hasOnly(['featuredImported', 'updatedAt'])
+        && request.resource.data.featuredImported is bool;
+    }
+
     match /admins/{uid} {
       // A signed-in user may check whether they themselves are an admin.
       allow read: if request.auth != null && request.auth.uid == uid;

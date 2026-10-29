@@ -3,9 +3,10 @@
 //   npm run images
 //
 // Source JPGs in src/assets stay untouched (they are the masters). Output goes
-// to src/assets/optimized/<name>-<width>.webp plus a tiny <name>-lqip.webp
-// blur placeholder, and manifest.json records each photo's intrinsic size so
-// the site can reserve space and avoid layout shift. Existing renditions are
+// to public/portfolio/<name>-<width>.webp plus a tiny <name>-lqip.webp blur
+// placeholder. The URLs are stable (not build-hashed) so CMS documents can
+// point at them. src/data/photo-manifest.json records each photo's intrinsic
+// size so the site can reserve space and avoid layout shift. Existing renditions are
 // skipped, so re-running after adding a photo only processes the new one.
 import { readdir, mkdir, writeFile, access } from 'node:fs/promises';
 import path from 'node:path';
@@ -14,7 +15,8 @@ import sharp from 'sharp';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const srcDir = path.join(root, 'src/assets');
-const outDir = path.join(srcDir, 'optimized');
+const outDir = path.join(root, 'public/portfolio');
+const manifestPath = path.join(root, 'src/data/photo-manifest.json');
 
 const WIDTHS = [640, 1280, 2048];
 const QUALITY = 74;
